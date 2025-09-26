@@ -1,16 +1,40 @@
 import React, { useState } from 'react'
+import {useAppContext} from "../context/AppContext"
+import {motion} from 'motion/react'
 
 export default function Hero() {
 
-    const [place, setPlace] = useState("");
+    const [pickupLocation, setPickupLocation] = useState("");
 
+
+    const { pickupDate, setPickupDate, returnDate, setReturnDate, navigate } = useAppContext()
+
+    const handleSearch = (e) => {
+        e.preventDefault()
+        navigate(
+            `/cars?pickupLocation=${pickupLocation}&pickupDate=${pickupDate}&returnDate=${returnDate}`
+        );
+
+    }
 
     return (
-        <div className='h-screen flex flex-col items-center
+        <motion.div 
+        initial={{opacity:0}}
+        animate={{opacity:1}}
+        transition={{duration:0.8}}
+        className='h-screen flex flex-col items-center
          justify-center'>
-            <h1 className='text-4xl md:text-5xl font-semibold'>Luxury cars on Rent</h1>
+            <motion.h1 
+            initial={{y:50,opacity:0}}
+            animate={{y:0,opacity:1}}
+            transition={{duration:0.8 , delay:0.2}}
+            className='text-4xl md:text-5xl font-semibold'>Luxury cars on Rent</motion.h1>
 
-            <form className='flex flex-col md:flex-row items-start md:items-center
+            <motion.form 
+            initial={{scale:0.95, opacity:0,y:50}}
+            animate={{scale:1,opacity:1,y:0}}
+            transition={{duration:0.6 ,delay:0.4}}
+            onSubmit={handleSearch} className='flex flex-col md:flex-row items-start md:items-center
             justify-between p-6 rounded-lg md:rounded-full w-full max-w-80 md:max-w-200
             bg-white shadow-[0px_8px_20px_rgba(0,0,0,0.1)]'>
 
@@ -18,7 +42,7 @@ export default function Hero() {
                gap-10 min-md:ml-8'>
 
                     <div>
-                        <select required value={place} onChange={(e) => setPlace(e.target.value)}>
+                        <select required value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)}>
                             <option value="">Pickup Location</option>
                             <option value="Pune">Pune</option>
                             <option value="Hederabad">Hyderabad</option>
@@ -28,32 +52,39 @@ export default function Hero() {
                             <option value="Delhi">Delhi</option>
 
                         </select>
-                        <p className='px-1 text-sm text-gray-500'>{place === "" ? "Please select location" : place}</p>
+                        <p className='px-1 text-sm text-gray-500'>{pickupLocation === "" ? "Please select location" : pickupLocation}</p>
                     </div>
 
                     <div className='flex flex-col items-start gap-2'>
                         <label htmlFor='pickup-date'>Pick-up Date</label>
-                        <input type="date" id="pickup-date" min={new Date().toISOString().split("T")[0]}
+                        <input value={pickupDate} onChange={e => setPickupDate(e.target.value)} type="date" id="pickup-date" min={new Date().toISOString().split("T")[0]}
                             className="text-sm text-gray-500" required />
 
                     </div>
 
                     <div className='flex flex-col items-start gap-2'>
                         <label htmlFor='return-date'>Return Date</label>
-                        <input type="date" id="return-date" 
+                        <input value={returnDate} onChange={e => setReturnDate(e.target.value)} type="date" id="return-date"
                             className="text-sm text-gray-500" required />
 
                     </div>
-                   <button className='flex items-center justify-center gap-1 px-9 py-3
+                    <motion.button 
+                    whileHover={{scale:1.05}}
+                    whileTap={{scale:0.95}}
+                    className='flex items-center justify-center gap-1 px-9 py-3
                    max-sm:mt-4 bg-primary hover:bg-primary-dull text-white rounded-full
                    cursor-popinter'>
-                    <img src='./search_icon.svg' alt='logo' className='brightness-300'/>
-                    Search</button>
+                        <img src='./search_icon.svg' alt='logo' className='brightness-300' />
+                        Search</motion.button>
                 </div>
 
-            </form>
+            </motion.form>
 
-            <img src="./main_car.png" alt='main_Car' />
-        </div>
+            <motion.img 
+            initial={{y:100, opacity:0}}
+            animate={{y:0,opacity:1}}
+            transition={{duration:0.8,delay:0.6}}
+            src="./main_car.png" alt='main_Car' />
+        </motion.div>
     )
 }

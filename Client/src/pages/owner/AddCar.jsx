@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import Title from "../../components/owner/Title"
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 
 export default function AddCar() {
 
-  const currency = import.meta.env.VITE_CURRENCY
+  const { axios, currency } = useAppContext()
 
 
   const [image, setImage] = useState(null);
@@ -11,17 +13,55 @@ export default function AddCar() {
     brand: '',
     model: '',
     year: 0,
-    priceperDay: 0,
+    pricePerDay: 0,
     category: '',
-    transmition: '',
+    transmision: '',
     fuel_type: '',
     seating_capacity: 0,
     location: '',
     description: '',
   })
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const onSubmitHandle = async (e) => {
     e.preventDefault();
+
+    if (isLoading) return null
+
+    setIsLoading(true)
+
+    try {
+      const formData = new FormData()
+
+      formData.append('image', image)
+      formData.append('carData', JSON.stringify(car))
+
+      const { data } = await axios.post('/owner/v1/add-car', formData)
+
+      if (data.success) {
+        toast.success(data.message)
+        setImage(null)
+        setCar({
+          brand: '',
+          model: '',
+          year: 0,
+          pricePerDay: 0,
+          category: '',
+          transmision: '',
+          fuel_type: '',
+          seating_capacity: 0,
+          location: '',
+          description: '',
+        })
+      }else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+        toast.error(error.message)
+    }finally{
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -36,7 +76,7 @@ export default function AddCar() {
         <div className='flex items-center gap-2 w-full'>
           <label htmlFor='car-image'>
             <img src={image ? URL.createObjectURL(image) : "/upload_icon.svg"} alt='car-img' className='h-14 rounded cursor-pointer' />
-            <input type="file" id='car-image' accept='image/*' hidden onChange={e => setImage(e.target.files[0])} />
+            <input type="file" id='car-image' accept='image/*' hidden onChange={e => setImage(e.target.files[0])} required />
           </label>
           <p className='text-sm text-gray-500'>Upload a picture of your car</p>
         </div>
@@ -60,37 +100,39 @@ export default function AddCar() {
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
           <div className='flex flex-col w-full'>
             <label>Year</label>
-            <input type='date' placeholder='2025' required
+            <input type='number' placeholder='2025' required
               className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none ' value={car.year} onChange={e => setCar({ ...car, year: e.target.value })} />
           </div>
 
           <div className='flex flex-col w-full'>
             <label>Daily Price ({currency})</label>
-            <input type='date' placeholder='2025' required
-              className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none ' value={car.priceperDay} onChange={e => setCar({ ...car, priceperDay: e.target.value })} />
+            <input type='number' placeholder='2025' required
+              className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none ' value={car.pricePerDay} onChange={e => setCar({ ...car, pricePerDay: e.target.value })} />
           </div>
 
           <div className='flex flex-col w-full'>
-            <label>Category ({currency})</label>
+            <label>Category</label>
             <select onChange={e => setCar({ ...car, category: e.target.value })} className='px-3 py-2 mt-1 border border-borderColor
              rounded-md outline-none' value={car.category}>
               <option value="">Select a category</option>
               <option value="Sedan">Sedan</option>
               <option value="Van">Van</option>
+              <option value="SUV">SUV</option>
+
             </select>
           </div>
 
         </div>
 
 
-        {/* Car transmition Fuel Type, Seating Capacity */}
+        {/* Car transmision Fuel Type, Seating Capacity */}
 
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
           <div className='flex flex-col w-full'>
-            <label>Transmission ({currency})</label>
-            <select onChange={e => setCar({ ...car, transmition: e.target.value })} className='px-3 py-2 mt-1 border border-borderColor
-             rounded-md outline-none' value={car.transmition}>
-              <option value="">Select a transmition</option>
+            <label>Transmision </label>
+            <select onChange={e => setCar({ ...car, transmision: e.target.value })} className='px-3 py-2 mt-1 border border-borderColor
+             rounded-md outline-none' value={car.transmision}>
+              <option value="">Select a transmision</option>
               <option value="Automatic">Automatic</option>
               <option value="Manual">Manual</option>
               <option value="Semi-Automatic">Semi-Automatic</option>
@@ -101,7 +143,7 @@ export default function AddCar() {
             <label>Fuel Type</label>
             <select onChange={e => setCar({ ...car, fuel_type: e.target.value })} className='px-3 py-2 mt-1 border border-borderColor
              rounded-md outline-none' value={car.fuel_type}>
-              <option value="">Select a transmition</option>
+              <option value="">Select a transmision</option>
               <option value="Gas">Gas</option>
               <option value="Diesel">Diesel</option>
               <option value="Petrol">Petrol</option>
@@ -138,14 +180,14 @@ export default function AddCar() {
           <label>Description</label>
           <textarea type='text' placeholder='e.g. A luxurious SUV with a spacious interior
           and a powerful engine' required
-            className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none ' value={car.priceperDay} onChange={e => setCar({ ...car, priceperDay: e.target.value })} >
-            </textarea>
+            className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none ' value={car.description} onChange={e => setCar({ ...car, description: e.target.value })} >
+          </textarea>
         </div>
 
-          <button className='flex items-center gap-2 px-2 mt-4 bg-primary text-white rounded-md w-max cursor-pointer'>
-            <img src='/tick_icon.svg' alt='tick'/>
-            List your car
-          </button>
+        <button className='flex items-center gap-2 px-2 mt-4 bg-primary text-white rounded-md w-max cursor-pointer'>
+          <img src='/tick_icon.svg' alt='tick' />
+         {isLoading ?"Listing..." : "List your car"}
+        </button>
       </form>
 
     </div>

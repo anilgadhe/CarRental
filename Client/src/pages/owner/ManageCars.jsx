@@ -1,24 +1,69 @@
 import React, { useEffect, useState } from 'react'
 import Title from '../../components/owner/Title'
-import { cars } from "../../assets/data"
+
+import { useAppContext } from '../../context/AppContext'
+import toast from 'react-hot-toast'
 
 export default function ManageCars() {
 
-  const currency = import.meta.env.VITE_CURRENCY;
+  const { currency, axios, isOwner } = useAppContext()
 
-  const [Cars, setCars] = useState([])
+  const [cars, setCars] = useState([])
 
   const fetchOwnerCars = async () => {
-    setCars(cars)
+    try {
+      const { data } = await axios.get('/owner/v1/cars')
+      if (data.success) {
+        setCars(data.Cars)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(data.message)
+    }
+  }
+
+  const toggleCarAvailability = async (CarId) => {
+    try {
+      const { data } = await axios.post('/owner/v1/toggle-car',{CarId})
+      if (data.success) {
+        toast.success(data.message)
+        fetchOwnerCars()
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(data.message)
+    }
+  }
+
+
+    const deleteCar = async (CarId) => {
+    try {
+      
+      const confirm = window.confirm("Are you sure you want to delete this car?")
+
+       if(!confirm) return null
+
+      const { data } = await axios.post('/owner/v1/delete-car',{CarId})
+      if (data.success) {
+        toast.success(data.message)
+        fetchOwnerCars()
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(data.message)
+    }
   }
 
   useEffect(() => {
-    fetchOwnerCars();
-  }, [])
+    isOwner && fetchOwnerCars();
+  }, [isOwner])
 
   return (
     <div className='px-4 pt-10 md:px-10 w-full'>
-      
+
       <Title title="Manage Cars" subTitle="View all listed cars, update their details, or remove them from the
       booking platform"/>
 
@@ -62,8 +107,10 @@ export default function ManageCars() {
                 </td>
 
                 <td className='flex items-center p-3'>
-                     <img src={car.isAvaliable ? "/eye_close_icon.svg " : "eye_icon.svg "} className='cursor-pointer'  alt=''/>
-                     <img src='/delete_icon.svg' alt='delete' className='cursor-pointer'/>
+                  <img onClick={()=>toggleCarAvailability(car._id)} src={car.isAvaliable ? "/eye_close_icon.svg " : "/eye_icon.svg "} className='cursor-pointer' alt='' />
+
+
+                  <img onClick={()=>deleteCar(car._id)} src='/delete_icon.svg' alt='delete' className='cursor-pointer' />
                 </td>
               </tr>
 

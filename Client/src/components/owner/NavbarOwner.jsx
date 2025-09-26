@@ -1,12 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import {dummyUserData} from "../../assets/data"
+import { useAppContext } from '../../context/AppContext';
+
 
 export default function NavbarOwner() {
 
-    const user = dummyUserData;
+    const{user}=useAppContext();
     return (
-        <div className='flex items-center justify-center px-6
+        <div className='flex items-center justify-between px-6
     md:px-10 py-4 text-gray-500 border-b border-borderColor
     relative transition-all'>
 
@@ -14,7 +15,7 @@ export default function NavbarOwner() {
                 <img src="/logo.svg" alt='logo' className='h-7' />
             </Link>
 
-            <p>Welcome, {user.name || "owner"}</p>
+            <p>Welcome, {user?.name || "owner"}</p>
         </div>
     )
 }
